@@ -1,0 +1,14 @@
+.App-main {
+  display: flex;
+  flex-direction: column;
+  padding: 2rem;
+  gap: 1rem;
+}
+
+.legend-container {
+  width: 100%;
+}
+
+.recalls-container {
+  width: 100%;
+}
