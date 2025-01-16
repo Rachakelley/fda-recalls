@@ -1,8 +1,8 @@
-import React from 'react';
-import './App.css';
-import Header from './components/Header/Header';
-import Recalls from './components/Recall/Recalls';
-import Legend from './components/Legend/Legend';
+import React from "react";
+import "./App.css";
+import Header from "./components/Header/Header";
+import Recalls from "./components/Recall/Recalls";
+import Legend from "./components/Legend/Legend";
 
 function App() {
   return (
