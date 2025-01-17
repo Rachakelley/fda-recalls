@@ -32,11 +32,11 @@ function Recalls({ loading, error, results }) {
             <div className="legend-container">
               <Legend />
             </div> */}
-      {error ? (
+      {/* {error ? (
         <p>{error}</p>
       ) : (
         <RecallsAccordion groupedRecalls={groupedRecalls} />
-      )}
+      )} */}
     </div>
   );
 }

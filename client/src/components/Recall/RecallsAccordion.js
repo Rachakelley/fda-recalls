@@ -73,7 +73,20 @@ const RecallsAccordion = ({ groupedRecalls = {} }) => {
                 <strong>Status:</strong> {recall.status}
               </Typography>
               <Typography>
-                <strong>Date Initiated:</strong> {recall.recall_initiation_date}
+                <strong>Date Initiated:</strong>{" "}
+                {recall.recall_initiation_date
+                  ? (() => {
+                      try {
+                        const date = recall.recall_initiation_date;
+                        const year = date.substring(0, 4);
+                        const month = date.substring(4, 6);
+                        const day = date.substring(6, 8);
+                        return `${month}/${day}/${year}`;
+                      } catch {
+                        return "Date not available";
+                      }
+                    })()
+                  : "Date not available"}
               </Typography>
             </div>
           ))}

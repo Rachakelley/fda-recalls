@@ -1,6 +1,8 @@
-import React from "react";
+import React, { useState } from "react";
 import dayjs from "dayjs";
 import { useQuery } from "@apollo/client";
+import FilterListIcon from "@mui/icons-material/FilterList";
+import HoverPopover from "../Popover/HoverPopover";
 
 import Recalls from "../Recall/Recalls";
 import Legend from "../Legend/Legend";
@@ -15,9 +17,10 @@ const today = dayjs();
 const yesterday = today.subtract(30, "day");
 
 const FDARecalls = () => {
-  const [startDate, setStartDate] = React.useState(yesterday);
-  const [endDate, setEndDate] = React.useState(today);
-  const [limit, setLimit] = React.useState(10);
+  const [startDate, setStartDate] = useState(yesterday);
+  const [endDate, setEndDate] = useState(today);
+  const [limit, setLimit] = useState(10);
+  const [isExpanded, setIsExpanded] = useState(true);
 
   const { loading, error, data } = useQuery(getRecalls, {
     variables: {
@@ -30,9 +33,17 @@ const FDARecalls = () => {
   const { results: recalls, total_results: totalRecalls } = data?.recalls || {};
 
   return (
-    <div>
-      <h2>FDA Recalls</h2>
-      <div className="recalls-date-limit-wrapper">
+    <div className="fda-recalls">
+      <div
+        className={`recalls-date-limit-tab ${isExpanded ? "expanded" : ""}`}
+        onClick={() => setIsExpanded(!isExpanded)}
+      >
+        {/* <FilterListIcon /> */}
+        {<HoverPopover />}
+      </div>
+      <div
+        className={`recalls-date-limit-wrapper ${isExpanded ? "expanded" : ""}`}
+      >
         <div className="recalls-date-text">
           <p>
             Showing <strong>{limit}</strong> of{" "}

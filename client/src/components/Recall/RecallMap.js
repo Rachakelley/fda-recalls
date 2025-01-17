@@ -11,7 +11,8 @@ import RecallPopup from "../RecallPopup/RecallPopup";
 // Fix marker icon issues
 delete L.Icon.Default.prototype._getIconUrl;
 
-const defaultZoom = 4;
+const defaultZoom = 5;
+const minZoom = 4;
 const centerCoords = [39.8283, -98.5795];
 
 const getOffsetPosition = (baseCoords, index, total) => {
@@ -83,13 +84,16 @@ const RecallMap = ({ recalls, loading }) => {
   }
 
   return (
-    <MapContainer
-      className="recall-map"
-      center={centerCoords}
-      zoom={defaultZoom}
-    >
-      <MapContent recalls={recalls} />
-    </MapContainer>
+    <div className="recall-map-container">
+      <MapContainer
+        className="recall-map"
+        center={centerCoords}
+        zoom={defaultZoom}
+        minZoom={minZoom}
+      >
+        <MapContent recalls={recalls} />
+      </MapContainer>
+    </div>
   );
 };
 

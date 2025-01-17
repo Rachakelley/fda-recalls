@@ -1,20 +1,30 @@
 .App-header {
   display: flex;
+  height: 60px;
   align-items: center;
   justify-content: space-between;
   padding: 10px;
   background-color: #00517d;
   color: white;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 9999;
+  box-sizing: border-box;
 }
 
 .fda-logo {
   height: 40px;
   margin-right: 2rem;
+  max-width: 100%;
 }
 
 .hhs-container {
   display: flex;
   align-items: center;
+  max-width: 50%;
+  overflow: hidden;
 }
 
 .hhs-text {

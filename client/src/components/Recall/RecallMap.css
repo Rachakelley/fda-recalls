@@ -6,10 +6,18 @@
   margin: 0;
 }
 
+.recall-map-container {
+  height: 100vh;
+  width: 100%;
+  position: relative;
+  min-height: 400px; /* Fallback height */
+}
+
 .recall-map {
-  height: 50vh;
+  height: 100%;
   width: 100%;
 }
+
 .recall-list {
   margin-top: 10px;
   overflow-y: auto;
@@ -30,4 +38,20 @@
   color: #666;
   font-style: italic;
   margin-top: 8px;
+}
+
+.leaflet-top {
+  top: 60px !important;
+}
+
+.leaflet-bottom {
+  bottom: 60px !important;
+}
+
+.leaflet-control {
+  z-index: 1000;
+}
+
+.leaflet-control-attribution {
+  top: 60px;
 }

@@ -3,6 +3,8 @@
   align-items: center;
   padding: 15px;
   border-left: 1px solid #ddd;
+  flex: 0 1 auto;
+  min-width: fit-content;
 
   > div:first-child {
     margin-right: 5px;

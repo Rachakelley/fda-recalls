@@ -1,7 +1,6 @@
 .App-main {
   display: flex;
   flex-direction: column;
-  padding: 2rem;
   gap: 1rem;
 }
 
