@@ -1,0 +1,41 @@
+.limit-selector-root {
+  display: flex;
+  flex-flow: row nowrap;
+  align-items: center;
+  padding: 15px;
+  border-radius: 8px;
+  border: 1px solid #b6daff;
+  transition: border-color 0.3s;
+}
+
+.limit-selector-root:hover {
+  border-color: #4e4d4d;
+}
+
+.limit-selector-input {
+  padding: 0 4px;
+  width: 40px;
+  font-size: 16px;
+  font-weight: 500;
+  border: 0;
+  outline: 0;
+  text-align: center;
+}
+
+.limit-selector-button {
+  display: flex;
+  flex-shrink: 0;
+  padding: 2px;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.limit-selector-button:hover {
+  background: #daecff;
+}
+
+.limit-selector-button.increment {
+  order: 1;
+}

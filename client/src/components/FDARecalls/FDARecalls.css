@@ -1,0 +1,53 @@
+.recalls-date-limit-wrapper {
+  background-color: #f9f9f9;
+  padding: 20px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  margin-bottom: 20px;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+
+  @media (max-width: 480px) {
+    flex-wrap: wrap;
+  }
+}
+
+.recalls-date-text {
+  padding: 15px;
+
+  p {
+    margin: 0;
+  }
+}
+
+.date-range {
+  flex: 2;
+}
+
+.date-range p {
+  color: #333;
+  font-size: 14px;
+  margin: 0;
+  line-height: 1.5;
+}
+
+.date-range strong {
+  color: #00468b;
+}
+
+.results-limit {
+  text-align: center;
+  padding-left: 15px;
+  padding-right: 15px;
+  display: flex;
+  flex-direction: column;
+}
+
+.results-limit p {
+  color: #666;
+  font-size: 12px;
+  font-weight: 600;
+  margin: 0;
+  text-transform: uppercase;
+}

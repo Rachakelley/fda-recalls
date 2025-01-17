@@ -6,6 +6,10 @@
   margin: 0;
 }
 
+.recall-map {
+  height: 50vh;
+  width: 100%;
+}
 .recall-list {
   margin-top: 10px;
   overflow-y: auto;

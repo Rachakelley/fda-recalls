@@ -1,43 +1,67 @@
-const express = require('express');
-const path = require('path');
-const { graphqlHTTP } = require('express-graphql');
-const schema = require('./schema/schema');
-const resolvers = require('./resolvers/resolvers');
-const app = express();
-const port = process.env.PORT || 5000;
+require("dotenv").config();
 
-// Middleware
-app.use(express.json());
-app.use((req, res, next) => {
-  console.log(`${req.method} ${req.url}`);
-  next();
-});
+const express = require("express");
+const { ApolloServer } = require("apollo-server-express");
+const cors = require("cors");
+const schema = require("./schema/schema");
+const resolvers = require("./resolvers/resolvers");
 
-// API Routes
-const indexRouter = require('./routes/index');
-app.use('/api', indexRouter);
+const CORS_ORIGIN = process.env.CORS_ORIGIN || "http://localhost:3000";
+const PORT = process.env.PORT || 5000;
 
-app.use('/graphql', graphqlHTTP({
-  schema: schema,
-  rootValue: resolvers,
-  graphiql: true
-}));
+async function startApolloServer() {
+  const app = express();
 
-// Error handler
-app.use((err, req, res, next) => {
-  console.error(err.stack);
-  res.status(500).json({ error: 'Something broke!' });
-});
+  // Request logging middleware
+  app.use((req, res, next) => {
+    console.log(`${new Date().toISOString()} - ${req.method} ${req.url}`);
+    next();
+  });
 
-// Production setup
-if (process.env.NODE_ENV === 'production') {
-  app.use(express.static(path.join(__dirname, '../client/build')));
-  app.get('*', (req, res) => {
-    res.sendFile(path.resolve(__dirname, '../client', 'build', 'index.html'));
+  // CORS configuration
+  app.use(
+    cors({
+      origin: CORS_ORIGIN,
+      credentials: true,
+      methods: ["GET", "POST", "OPTIONS"],
+      allowedHeaders: ["Content-Type", "Authorization"],
+    })
+  );
+
+  const server = new ApolloServer({
+    typeDefs: schema,
+    resolvers,
+    context: ({ req, res }) => ({ req, res }),
+    formatError: (error) => {
+      console.error("GraphQL Error:", error);
+      return error;
+    },
+    playground: {
+      endpoint: "/graphql",
+      settings: {
+        "request.credentials": "include",
+      },
+    },
+    introspection: true,
+  });
+
+  await server.start();
+
+  server.applyMiddleware({
+    app,
+    cors: false, // Disable Apollo CORS - using Express CORS
+    path: "/graphql",
+  });
+
+  app.listen(PORT, () => {
+    console.log(
+      `🚀 Server ready at http://localhost:${PORT}${server.graphqlPath}`
+    );
+    console.log(`🚀 Playground available at http://localhost:${PORT}/graphql`);
   });
 }
 
-app.listen(port, () => {
-  console.log(`Server running on port ${port}`);
-  console.log(`GraphiQL interface available at http://localhost:${port}/graphql`);
+startApolloServer().catch((error) => {
+  console.error("Failed to start server:", error);
+  process.exit(1);
 });

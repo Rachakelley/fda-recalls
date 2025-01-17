@@ -12,8 +12,13 @@ const schema = buildSchema(`
     classification: String
   }
 
+  type RecallResponse {
+    total_results: Int
+    results: [Recall]
+  }
+
   type Query {
-    recalls(limit: Int): [Recall]
+    recalls(startDate: String, endDate: String, limit: Int): RecallResponse
   }
 `);
 

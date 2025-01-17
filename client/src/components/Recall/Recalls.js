@@ -1,94 +1,41 @@
-import React, { useState, useEffect } from "react";
-import axios from "axios";
-import {
-  Accordion,
-  AccordionSummary,
-  AccordionDetails,
-  Typography,
-} from "@mui/material";
-import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import { getClassificationColor } from "../utils/getClassificationColor";
+import React from "react";
+import { CircularProgress, Box } from "@mui/material";
 import RecallMap from "./RecallMap";
+import RecallsAccordion from "./RecallsAccordion";
 
-function Recalls() {
-  const [recalls, setRecalls] = useState([]);
-  const [error, setError] = useState("");
+function Recalls({ loading, error, results }) {
+  if (loading)
+    return (
+      <Box sx={{ display: "flex", justifyContent: "center", padding: "2rem" }}>
+        <CircularProgress />
+      </Box>
+    );
+  if (error) return <div>Error: {error.message}</div>;
 
-  useEffect(() => {
-    const query = `
-      query {
-        recalls(limit: 5) {
-          classification
-          distribution_pattern
-          recalling_firm
-          product_description
-          reason_for_recall
-          recall_initiation_date
-          recall_number
-          status
-        }
+  // Ensure recalls is always an array
+  const recalls = Array.isArray(results) ? results : [];
+
+  // groups an array of recall objects by the recalling_firm property
+  const groupedRecalls =
+    recalls &&
+    recalls.reduce((groupsByRecall, recall) => {
+      if (!groupsByRecall[recall.recalling_firm]) {
+        groupsByRecall[recall.recalling_firm] = [];
       }
-    `;
-
-    axios
-      .post("/graphql", {
-        query: query,
-      })
-      .then((response) => setRecalls(response.data.data.recalls))
-      .catch((error) => setError("Error fetching recalls: " + error.message));
-  }, []);
+      groupsByRecall[recall.recalling_firm].push(recall);
+      return groupsByRecall;
+    }, {});
 
   return (
     <div>
-      <RecallMap recalls={recalls} />
+      {/* <RecallMap recalls={recalls} loading={loading} />
+            <div className="legend-container">
+              <Legend />
+            </div> */}
       {error ? (
         <p>{error}</p>
       ) : (
-        <div>
-          {recalls &&
-            recalls.map((recall, index) => (
-              <Accordion
-                key={recall.recall_number || index}
-                sx={{
-                  "& .MuiAccordionSummary-root": {
-                    backgroundColor: getClassificationColor(
-                      recall.classification
-                    ),
-                  },
-                }}
-              >
-                <AccordionSummary
-                  expandIcon={<ExpandMoreIcon />}
-                  aria-controls={`recall-${index}-content`}
-                  id={`recall-${index}-header`}
-                >
-                  <Typography sx={{ fontWeight: "bold" }}>
-                    {recall.recalling_firm}
-                  </Typography>
-                </AccordionSummary>
-                <AccordionDetails>
-                  <Typography>
-                    <strong>Product Description:</strong>{" "}
-                    {recall.product_description}
-                  </Typography>
-                  <Typography>
-                    <strong>Reason for Recall:</strong>{" "}
-                    {recall.reason_for_recall}
-                  </Typography>
-                  <Typography>
-                    <strong>Distribution:</strong> {recall.distribution_pattern}
-                  </Typography>
-                  <Typography>
-                    <strong>Status:</strong> {recall.status}
-                  </Typography>
-                  <Typography>
-                    <strong>Date Initiated:</strong>{" "}
-                    {recall.recall_initiation_date}
-                  </Typography>
-                </AccordionDetails>
-              </Accordion>
-            ))}
-        </div>
+        <RecallsAccordion groupedRecalls={groupedRecalls} />
       )}
     </div>
   );
