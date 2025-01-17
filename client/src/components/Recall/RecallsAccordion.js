@@ -9,55 +9,77 @@ import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { getClassificationColor } from "../utils/getClassificationColor";
 import "./RecallsAccordion.css";
 
+const getClassificationPriority = (classification) => {
+  switch (classification) {
+    case "Class I":
+      return 1;
+    case "Class II":
+      return 2;
+    case "Class III":
+      return 3;
+    default:
+      return 0;
+  }
+};
+
 const RecallsAccordion = ({ groupedRecalls = {} }) => {
   if (!groupedRecalls) {
     return null;
   }
 
-  return Object.keys(groupedRecalls).map((firm, index) => (
-    <Accordion
-      key={firm || index}
-      sx={{
-        "& .MuiAccordionSummary-root": {
-          backgroundColor: getClassificationColor(
-            groupedRecalls[firm][0].classification
-          ),
-        },
-      }}
-    >
-      <AccordionSummary
-        expandIcon={<ExpandMoreIcon />}
-        aria-controls={`recall-${index}-content`}
-        id={`recall-${index}-header`}
+  return Object.keys(groupedRecalls)
+    .sort((a, b) => {
+      const classA = groupedRecalls[a][0].classification;
+      const classB = groupedRecalls[b][0].classification;
+      return (
+        getClassificationPriority(classB) - getClassificationPriority(classA)
+      );
+    })
+    .map((firm, index) => (
+      <Accordion
+        key={firm || index}
+        sx={{
+          "& .MuiAccordionSummary-root": {
+            backgroundColor: getClassificationColor(
+              groupedRecalls[firm][0].classification
+            ),
+          },
+        }}
       >
-        <Typography sx={{ fontWeight: "bold" }}>{firm}</Typography>
-      </AccordionSummary>
-      <AccordionDetails>
-        {groupedRecalls[firm].map((recall, recallIndex) => (
-          <div
-            className="recall-accordion-entry"
-            key={recall.recall_number || recallIndex}
-          >
-            <Typography>
-              <strong>Product Description:</strong> {recall.product_description}
-            </Typography>
-            <Typography>
-              <strong>Reason for Recall:</strong> {recall.reason_for_recall}
-            </Typography>
-            <Typography>
-              <strong>Distribution:</strong> {recall.distribution_pattern}
-            </Typography>
-            <Typography>
-              <strong>Status:</strong> {recall.status}
-            </Typography>
-            <Typography>
-              <strong>Date Initiated:</strong> {recall.recall_initiation_date}
-            </Typography>
-          </div>
-        ))}
-      </AccordionDetails>
-    </Accordion>
-  ));
+        <AccordionSummary
+          expandIcon={<ExpandMoreIcon />}
+          aria-controls={`recall-${index}-content`}
+          id={`recall-${index}-header`}
+        >
+          <Typography sx={{ fontWeight: "bold" }}>{firm}</Typography>
+        </AccordionSummary>
+        <AccordionDetails>
+          {groupedRecalls[firm].map((recall, recallIndex) => (
+            <div
+              className="recall-accordion-entry"
+              key={recall.recall_number || recallIndex}
+            >
+              <Typography>
+                <strong>Product Description:</strong>{" "}
+                {recall.product_description}
+              </Typography>
+              <Typography>
+                <strong>Reason for Recall:</strong> {recall.reason_for_recall}
+              </Typography>
+              <Typography>
+                <strong>Distribution:</strong> {recall.distribution_pattern}
+              </Typography>
+              <Typography>
+                <strong>Status:</strong> {recall.status}
+              </Typography>
+              <Typography>
+                <strong>Date Initiated:</strong> {recall.recall_initiation_date}
+              </Typography>
+            </div>
+          ))}
+        </AccordionDetails>
+      </Accordion>
+    ));
 };
 
 export default RecallsAccordion;
