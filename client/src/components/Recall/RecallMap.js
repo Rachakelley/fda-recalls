@@ -6,6 +6,7 @@ import stateCoordinates from "../utils/stateCoordinates";
 import groupRecallsByStateAndClassification from "../utils/groupRecallsByStateAndClassification";
 import getMapMarkerIcon from "../utils/getMapMarkerIcon";
 import "./RecallMap.css";
+import RecallPopup from "../RecallPopup/RecallPopup";
 
 // Fix marker icon issues
 delete L.Icon.Default.prototype._getIconUrl;
@@ -21,7 +22,6 @@ const getOffsetPosition = (baseCoords, index, total) => {
 
   // Increased radius for wider spread
   const radius = 0.75;
-
   // Calculate angle based on index and total classifications
   const angle = (2 * Math.PI * index) / total;
 
@@ -63,30 +63,11 @@ const MapContent = ({ recalls }) => {
                   position={position}
                   icon={getMapMarkerIcon(classification)}
                 >
-                  <Popup className="recall-popup">
-                    <h4>
-                      {state} - {classification}
-                    </h4>
-                    <p>
-                      <strong>Total Recalls: {recalls.length}</strong>
-                    </p>
-                    <div className="recall-list">
-                      {recalls.slice(0, 5).map((recall, idx) => (
-                        <div key={idx} className="recall-item">
-                          <h4>{recall.recalling_firm}</h4>
-                          <p>{recall.product_description}</p>
-                          <p>
-                            <strong>Reason:</strong> {recall.reason_for_recall}
-                          </p>
-                        </div>
-                      ))}
-                      {recalls.length > 5 && (
-                        <p className="more-recalls">
-                          + {recalls.length - 5} more recalls...
-                        </p>
-                      )}
-                    </div>
-                  </Popup>
+                  <RecallPopup
+                    state={state}
+                    classification={classification}
+                    recalls={recalls}
+                  />
                 </Marker>
               );
             }

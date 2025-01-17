@@ -7,6 +7,7 @@ import {
 } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { getClassificationColor } from "../utils/getClassificationColor";
+import "./RecallsAccordion.css";
 
 const RecallsAccordion = ({ groupedRecalls = {} }) => {
   if (!groupedRecalls) {
@@ -33,7 +34,10 @@ const RecallsAccordion = ({ groupedRecalls = {} }) => {
       </AccordionSummary>
       <AccordionDetails>
         {groupedRecalls[firm].map((recall, recallIndex) => (
-          <div key={recall.recall_number || recallIndex}>
+          <div
+            className="recall-accordion-entry"
+            key={recall.recall_number || recallIndex}
+          >
             <Typography>
               <strong>Product Description:</strong> {recall.product_description}
             </Typography>
