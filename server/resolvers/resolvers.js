@@ -2,23 +2,22 @@ const { ApolloError } = require("apollo-server");
 
 const FDA_API_URL =
   process.env.FDA_API_URL || "https://api.fda.gov/food/enforcement.json";
+const US_STATE_BOUNDS_URL = "https://public.opendatasoft.com/api/explore/v2.1/catalog/datasets/us-state-boundaries/records?limit=56"
 
-/**
- * GraphQL resolvers for FDA recalls
- * @typedef {Object} Resolvers
- * @property {Object} Query - Query resolvers
- * @property {Function} Query.recalls - Fetches FDA recalls within a date range
- * @param {Object} args - Query arguments
- * @param {string} args.startDate - Start date for recall search (required)
- * @param {string} args.endDate - End date for recall search (required)
- * @param {number} [args.limit=10] - Maximum number of results to return
- * @throws {ApolloError} When startDate or endDate is missing
- * @throws {ApolloError} When API response format is invalid
- * @throws {ApolloError} When API request fails
- * @returns {Promise<Object>} Object containing total_results count and results array
- * @returns {number} returns.total_results - Total number of recalls found
- * @returns {Array} returns.results - Array of recall objects
- */
+const formatCoordinates = (coordinates, type) => {
+  if (!coordinates || !Array.isArray(coordinates)) {
+    return null;
+  }
+
+  if (type === "MultiPolygon") {
+    return coordinates;
+  } else if (type === "Polygon") {
+    return [coordinates];
+  }
+
+  return null;
+};
+
 const resolvers = {
   Query: {
     recalls: async (_, { startDate, endDate, limit = 10 }) => {
@@ -64,7 +63,45 @@ const resolvers = {
         );
       }
     },
-  },
+    stateBounds: async () => {
+      try {
+        const response = await fetch(US_STATE_BOUNDS_URL);
+        const data = await response.json();
+
+        console.log('State Bounds API Request:', data.results);
+
+        if (!data || !data.results) {
+          throw new ApolloError("Invalid API response format", "API_ERROR");
+        }
+
+        return data.results.map(item => {
+          return {
+            state: item.basename,
+            coordinates: () => {
+              try {
+                const geometry = item.st_asgeojson.geometry;
+                if (!geometry || !geometry.coordinates) {
+                  console.warn(`Missing coordinates data for state: ${item.basename}`);
+                  return null;
+                }
+                return formatCoordinates(geometry.coordinates, geometry.type);
+              } catch (error) {
+                console.error(`Error formatting coordinates for state ${item.basename}:`, error);
+                return null;
+              }
+            }
+          };
+        })
+      } catch (error) {
+        console.error("State Bounds API Error:", error);
+        throw new ApolloError(
+          "Failed to fetch state bounds data",
+          "API_ERROR",
+          { originalError: error }
+        );
+      }
+    }
+  }
 };
 
 module.exports = resolvers;

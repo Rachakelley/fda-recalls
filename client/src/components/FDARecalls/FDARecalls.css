@@ -1,6 +1,7 @@
 .fda-recalls {
   position: relative;
   height: 100vh;
+  top: 60px;
 }
 
 .recalls-date-limit-wrapper {

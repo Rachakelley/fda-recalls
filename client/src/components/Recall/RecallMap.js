@@ -1,5 +1,5 @@
 import React from "react";
-import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
+import { MapContainer, TileLayer, Marker, Popup, Polygon } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
 import stateCoordinates from "../utils/stateCoordinates";
@@ -11,8 +11,8 @@ import RecallPopup from "../RecallPopup/RecallPopup";
 // Fix marker icon issues
 delete L.Icon.Default.prototype._getIconUrl;
 
-const defaultZoom = 5;
-const minZoom = 4;
+const defaultZoom = 4;
+const minZoom = 3;
 const centerCoords = [39.8283, -98.5795];
 
 const getOffsetPosition = (baseCoords, index, total) => {
@@ -29,7 +29,25 @@ const getOffsetPosition = (baseCoords, index, total) => {
   return [lat + radius * Math.cos(angle), lng + radius * Math.sin(angle)];
 };
 
-const MapContent = ({ recalls }) => {
+export const formatStateCoordinates = (coordinates) => {
+  if (!coordinates || !Array.isArray(coordinates)) {
+    return null;
+  }
+
+  // Handle MultiPolygon format
+  if (Array.isArray(coordinates[0][0][0])) {
+    return coordinates[0][0].map((coord) => [coord[1], coord[0]]);
+  }
+
+  // Handle Polygon format
+  if (Array.isArray(coordinates[0][0])) {
+    return coordinates[0].map((coord) => [coord[1], coord[0]]);
+  }
+
+  return null;
+};
+
+const MapContent = ({ recalls, stateBoundsData, selectedClassifications }) => {
   const recallGroups = groupRecallsByStateAndClassification(recalls);
 
   return (
@@ -38,6 +56,64 @@ const MapContent = ({ recalls }) => {
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
       />
+      {stateBoundsData?.stateBounds
+        .filter((stateBound) => {
+          // Ensure required data exists
+          if (!stateCoordinates || !stateBound?.state) {
+            return false;
+          }
+
+          // Search through stateCoordinates keys for matching state name
+          return Object.keys(stateCoordinates).some(
+            (key) =>
+              stateCoordinates[key]?.name?.toLowerCase() ===
+              stateBound.state.toLowerCase()
+          );
+        })
+        .map((stateBound) => {
+          const validCoordinates = stateBound.coordinates
+            ? formatStateCoordinates(stateBound.coordinates)
+            : null;
+
+          if (!validCoordinates) {
+            console.warn(`Invalid coordinates for state: ${stateBound.state}`);
+            return null;
+          }
+
+          return validCoordinates ? (
+            <Polygon
+              key={stateBound.state}
+              positions={validCoordinates}
+              color="white"
+              fillColor="orange"
+              eventHandlers={{
+                mouseover: (e) => {
+                  const layer = e.target;
+                  layer.setStyle({
+                    fillColor: "#FFA07A",
+                    fillOpacity: 0.7,
+                    weight: 2,
+                  });
+                },
+                mouseout: (e) => {
+                  const layer = e.target;
+                  layer.setStyle({
+                    fillColor: "orange",
+                    fillOpacity: 0.2,
+                    fillRule: "evenodd",
+                  });
+                },
+                click: (e) => {
+                  const map = e.target._map;
+                  map.flyToBounds(e.target.getBounds(), {
+                    duration: 1.5,
+                    easeLinearity: 0.25,
+                  });
+                },
+              }}
+            />
+          ) : null;
+        })}
       {recallGroups &&
         Object.entries(recallGroups || {}).map(([state, classGroups]) => {
           const coords = stateCoordinates[state];
@@ -48,7 +124,12 @@ const MapContent = ({ recalls }) => {
 
           return Object.entries(classGroups || {}).map(
             ([classification, recalls], groupIndex) => {
-              if (!recalls || recalls.length === 0) return null;
+              if (
+                !recalls ||
+                recalls.length === 0 ||
+                !selectedClassifications[classification]
+              )
+                return null;
 
               const position = getOffsetPosition(
                 coords,
@@ -78,7 +159,7 @@ const MapContent = ({ recalls }) => {
   );
 };
 
-const RecallMap = ({ recalls, loading }) => {
+const RecallMap = ({ recalls, stateBoundsData, selectedClassifications }) => {
   if (!recalls || recalls.length === 0) {
     return <div>No recalls found.</div>;
   }
@@ -91,7 +172,11 @@ const RecallMap = ({ recalls, loading }) => {
         zoom={defaultZoom}
         minZoom={minZoom}
       >
-        <MapContent recalls={recalls} />
+        <MapContent
+          recalls={recalls}
+          stateBoundsData={stateBoundsData}
+          selectedClassifications={selectedClassifications}
+        />
       </MapContainer>
     </div>
   );

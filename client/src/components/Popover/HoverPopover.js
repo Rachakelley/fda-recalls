@@ -1,9 +1,8 @@
 import * as React from "react";
 import Popover from "@mui/material/Popover";
 import Typography from "@mui/material/Typography";
-import FilterListIcon from "@mui/icons-material/FilterList";
 
-const HoverPopover = () => {
+const HoverPopover = ({ component, text }) => {
   const [anchorEl, setAnchorEl] = React.useState(null);
 
   const handlePopoverOpen = (event) => {
@@ -24,7 +23,7 @@ const HoverPopover = () => {
         onMouseEnter={handlePopoverOpen}
         onMouseLeave={handlePopoverClose}
       >
-        <FilterListIcon />
+        {component}
       </Typography>
       <Popover
         id="mouse-over-popover"
@@ -42,7 +41,7 @@ const HoverPopover = () => {
         onClose={handlePopoverClose}
         disableRestoreFocus
       >
-        <Typography sx={{ p: 1 }}>Filter</Typography>
+        <Typography sx={{ p: 1 }}>{text}</Typography>
       </Popover>
     </div>
   );

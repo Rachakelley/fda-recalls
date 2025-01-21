@@ -17,8 +17,14 @@ const schema = buildSchema(`
     results: [Recall]
   }
 
+  type StateBounds {
+    state: String!
+    coordinates: [[[[Float]]]]
+  }
+
   type Query {
     recalls(startDate: String, endDate: String, limit: Int): RecallResponse
+    stateBounds: [StateBounds!]!
   }
 `);
 
