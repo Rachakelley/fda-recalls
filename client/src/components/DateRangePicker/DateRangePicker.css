@@ -1,9 +1,4 @@
 .date-range-picker {
-  display: flex;
-  align-items: center;
-  padding: 15px;
-  border-left: 1px solid #ddd;
-  flex: 0 1 auto;
   min-width: fit-content;
 
   > div {
@@ -19,15 +14,6 @@
     border: 1px solid #b6daff;
     transition: border-color 0.3s;
   }
-}
-
-.date-range-picker label {
-  color: #666;
-  font-size: 13px;
-  font-weight: 600;
-  text-transform: uppercase;
-  display: block;
-  margin-bottom: 8px;
 }
 
 .date-inputs {

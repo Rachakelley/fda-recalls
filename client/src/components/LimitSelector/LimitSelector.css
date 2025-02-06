@@ -1,41 +1,34 @@
 .limit-selector-root {
-  display: flex;
-  flex-flow: row nowrap;
-  align-items: center;
-  padding: 15px;
-  border-radius: 8px;
-  border: 1px solid #b6daff;
-  transition: border-color 0.3s;
+  min-width: fit-content;
+
+  .MuiInputBase-root {
+    height: 56px;
+  }
+
+  > div {
+    max-width: 160px;
+  }
+
+  > div:first-child {
+    margin-right: 5px;
+  }
+
+  .MuiOutlinedInput-notchedOutline {
+    border-radius: 8px;
+    border: 1px solid #b6daff;
+    transition: border-color 0.3s;
+  }
 }
 
-.limit-selector-root:hover {
-  border-color: #4e4d4d;
+.limit-selector-select {
+  padding: 10px;
+  font-size: 14px;
+  color: #333;
+  width: 130px;
 }
 
-.limit-selector-input {
-  padding: 0 4px;
-  width: 40px;
-  font-size: 16px;
-  font-weight: 500;
-  border: 0;
-  outline: 0;
-  text-align: center;
-}
-
-.limit-selector-button {
-  display: flex;
-  flex-shrink: 0;
-  padding: 2px;
-  border: 0;
-  background: transparent;
-  cursor: pointer;
-  border-radius: 4px;
-}
-
-.limit-selector-button:hover {
-  background: #daecff;
-}
-
-.limit-selector-button.increment {
-  order: 1;
+.limit-selector-select:focus {
+  outline: none;
+  border-color: #00468b;
+  box-shadow: 0 0 0 2px rgba(0, 70, 139, 0.1);
 }

@@ -1,10 +1,17 @@
-import { gql } from "@apollo/client";
+import { gql } from '@apollo/client';
 
 export const getStateBounds = gql`
-  query GetStateBounds {
-    stateBounds {
-        state
-        coordinates
-    }
-  }
+	query GetStateBounds {
+		stateBounds {
+			type
+			features {
+				type
+				properties
+				geometry {
+					type
+					coordinates
+				}
+			}
+		}
+	}
 `;

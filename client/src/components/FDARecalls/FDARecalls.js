@@ -1,124 +1,170 @@
-import React, { useState } from "react";
-import dayjs from "dayjs";
-import { useQuery } from "@apollo/client";
-import FilterListIcon from "@mui/icons-material/FilterList";
-import { CircularProgress, Box } from "@mui/material";
-import { getStateBounds } from "../../queries/getStateBounds";
-import HoverPopover from "../Popover/HoverPopover";
-import ClassificationFilter from "../ClassificationFilter/ClassificationFilter";
-import Recalls from "../Recall/Recalls";
-import DateRangePicker from "../DateRangePicker/DateRangePicker";
-import LimitSelector from "../LimitSelector/LimitSelector";
-import RecallMap from "../Recall/RecallMap";
-import { getRecalls } from "../../queries/getRecalls";
+import React, { useState, useMemo, Suspense, lazy } from 'react';
+import { useQuery } from '@apollo/client';
+import debounce from 'lodash/debounce';
+import dayjs from 'dayjs';
+import { CircularProgress } from '@mui/material';
+import FilterListIcon from '@mui/icons-material/FilterList';
+import { getStateBounds } from '../../queries/getStateBounds';
+import { getRecalls } from '../../queries/getRecalls';
+import HoverPopover from '../Popover/HoverPopover';
+import RecallMap from '../RecallMap/RecallMap';
+import './FDARecalls.css';
 
-import "./FDARecalls.css";
+const Sidebar = lazy(() => import('../Sidebar/Sidebar'));
+const DateRangePicker = lazy(() =>
+	import('../DateRangePicker/DateRangePicker')
+);
+const LimitSelector = lazy(() => import('../LimitSelector/LimitSelector'));
+const ClassificationFilter = lazy(() =>
+	import('../ClassificationFilter/ClassificationFilter')
+);
 
 const today = dayjs();
-const yesterday = today.subtract(30, "day");
+const yesterday = today.subtract(30, 'day');
 
 const FDARecalls = () => {
-  const [startDate, setStartDate] = useState(yesterday);
-  const [endDate, setEndDate] = useState(today);
-  const [limit, setLimit] = useState(10);
-  const [isExpanded, setIsExpanded] = useState(true);
-  const [selectedClassifications, setSelectedClassifications] = useState({
-    "Class I": true,
-    "Class II": true,
-    "Class III": true,
-  });
-  const { loading, error, data } = useQuery(getRecalls, {
-    variables: {
-      startDate: startDate.format("YYYYMMDD"),
-      endDate: endDate.format("YYYYMMDD"),
-      limit: parseInt(limit),
-    },
-  });
-  const { data: stateBoundsData, loading: stateBoundsLoading } =
-    useQuery(getStateBounds);
+	const [startDate, setStartDate] = useState(yesterday);
+	const [endDate, setEndDate] = useState(today);
+	const [limit, setLimit] = useState(10);
+	const [isFilterTabExpanded, setIsFilterTabExpanded] = useState(false);
+	const [isStateAccordionExpanded, setIsStateAccordionExpanded] =
+		useState(null);
+	const [selectedClassifications, setSelectedClassifications] = useState({
+		'Class I': true,
+		'Class II': true,
+		'Class III': true,
+	});
 
-  if (stateBoundsLoading || loading) {
-    return (
-      <Box
-        sx={{
-          position: "absolute",
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          backgroundColor: "rgba(255, 255, 255, 0.7)",
-          zIndex: 1000,
-        }}
-      >
-        <CircularProgress />
-      </Box>
-    );
-  }
+	const { loading: loadingRecallData, data } = useQuery(getRecalls, {
+		variables: {
+			startDate: startDate.format('YYYYMMDD'),
+			endDate: endDate.format('YYYYMMDD'),
+			limit: parseInt(limit),
+		},
+	});
+	const {
+		data: { stateBounds: stateBoundsData } = {},
+		loading: stateBoundsLoading,
+	} = useQuery(getStateBounds);
+	console.log('stateBoundsData', stateBoundsData);
 
-  const { results: recalls, total_results: totalRecalls } = data?.recalls || {};
+	const recalls = useMemo(() => {
+		const results = data?.recalls?.results || [];
+		return results.filter(
+			(recall) =>
+				Object.keys(selectedClassifications).length === 0 ||
+				Object.keys(selectedClassifications).includes(recall.classification)
+		);
+	}, [data?.recalls?.results, selectedClassifications]);
 
-  return (
-    <div className="fda-recalls">
-      <div
-        className={`recalls-date-limit-tab ${isExpanded ? "expanded" : ""}`}
-        onClick={() => setIsExpanded(!isExpanded)}
-      >
-        {<HoverPopover component={<FilterListIcon />} text="Filter" />}
-      </div>
-      <div
-        className={`recalls-date-limit-wrapper ${isExpanded ? "expanded" : ""}`}
-      >
-        <div className="recalls-date-text">
-          <p>
-            Showing <strong>{limit}</strong> of{" "}
-            <strong>{totalRecalls || 0}</strong> recalls from{" "}
-            {startDate.format("MM/DD/YYYY")} to {endDate.format("MM/DD/YYYY")}
-          </p>
-        </div>
-        <div className="results-limit">
-          <p>Results Limit</p>
-          <LimitSelector limit={limit} setLimit={setLimit} />
-        </div>
-        <DateRangePicker
-          startDate={startDate}
-          setStartDate={setStartDate}
-          endDate={endDate}
-          setEndDate={setEndDate}
-          popoverProps={{
-            slotProps: {
-              paper: {
-                "aria-modal": true,
-                role: "dialog",
-                inert: true,
-                onKeyDown: (e) => {
-                  if (e.key === "Escape") {
-                    setEndDate(null);
-                  }
-                },
-              },
-            },
-          }}
-        />
-      </div>
-      <div className="recalls-container">
-        <RecallMap
-          recalls={recalls}
-          stateBoundsData={stateBoundsData}
-          selectedClassifications={selectedClassifications}
-        />
-        <div className="legend-container">
-          <ClassificationFilter
-            selectedClassifications={selectedClassifications}
-            setSelectedClassifications={setSelectedClassifications}
-          />
-        </div>
-        <Recalls loading={loading} error={error} results={recalls} />
-      </div>
-    </div>
-  );
+	const debouncedLimitUpdate = useMemo(
+		() =>
+			debounce((newLimit) => {
+				setLimit(newLimit);
+			}, 500),
+		[]
+	);
+
+	const debouncedDateUpdate = useMemo(
+		() =>
+			debounce((newStart, newEnd) => {
+				setStartDate(newStart);
+				setEndDate(newEnd);
+			}, 500),
+		[]
+	);
+
+	return (
+		<div className='fda-recalls'>
+			<div className='recalls-header'>
+				<div
+					className={`map-filters-tab ${isFilterTabExpanded ? 'expanded' : ''}`}
+					onClick={() => setIsFilterTabExpanded(!isFilterTabExpanded)}
+				>
+					<HoverPopover
+						component={<FilterListIcon />}
+						text='Filters'
+					/>
+				</div>
+				<div className='recalls-date-text'>
+					{loadingRecallData ? (
+						<p>Loading results...</p>
+					) : (
+						<p>
+							Showing{' '}
+							<strong>
+								{Math.min(limit, data?.recalls?.total_results || 0)}
+							</strong>{' '}
+							of <strong>{data?.recalls?.total_results || 0}</strong> recalls
+							from {startDate.format('MM/DD/YYYY')} to{' '}
+							{endDate.format('MM/DD/YYYY')}
+						</p>
+					)}
+				</div>
+			</div>
+			<Suspense
+				fallback={
+					<div className='sidebar-loading'>
+						<CircularProgress />
+					</div>
+				}
+			>
+				<Sidebar
+					recalls={data?.recalls}
+					expandedState={isStateAccordionExpanded}
+					setExpandedState={setIsStateAccordionExpanded}
+				/>
+			</Suspense>
+			<div
+				className={`map-filters-wrapper ${
+					isFilterTabExpanded ? 'expanded' : ''
+				}`}
+			>
+				<Suspense fallback={<CircularProgress />}>
+					<div className='map-filters'>
+						<p>Filters</p>
+						<LimitSelector
+							limit={limit}
+							setLimit={debouncedLimitUpdate}
+						/>
+						<DateRangePicker
+							startDate={startDate}
+							endDate={endDate}
+							setStartDate={(date) => debouncedDateUpdate(date, endDate)}
+							setEndDate={(date) => debouncedDateUpdate(startDate, date)}
+							popoverProps={{
+								slotProps: {
+									paper: {
+										'aria-modal': true,
+										role: 'dialog',
+										inert: true,
+										onKeyDown: (e) => {
+											if (e.key === 'Escape') {
+												setEndDate(null);
+											}
+										},
+									},
+								},
+							}}
+						/>
+						<ClassificationFilter
+							selectedClassifications={selectedClassifications}
+							setSelectedClassifications={setSelectedClassifications}
+						/>
+					</div>
+				</Suspense>
+			</div>
+			<div className='recalls-container'>
+				<RecallMap
+					recalls={recalls}
+					stateBoundsData={stateBoundsData}
+					selectedClassifications={selectedClassifications}
+					setExpandedState={setIsStateAccordionExpanded}
+					loadingRecallData={loadingRecallData}
+				/>
+			</div>
+		</div>
+	);
 };
 
 export default FDARecalls;

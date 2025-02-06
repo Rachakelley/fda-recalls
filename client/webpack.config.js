@@ -1,62 +1,94 @@
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
+const TerserPlugin = require('terser-webpack-plugin');
+const CssMinimizerPlugin = require('css-minimizer-webpack-plugin');
+const CompressionPlugin = require('compression-webpack-plugin');
 
 module.exports = {
-  mode: 'development',
-  entry: './src/index.js',
-  output: {
-    path: path.resolve(__dirname, 'dist'),
-    filename: '[name].bundle.js', // Use [name] to avoid conflicts
-    publicPath: '/',
-    clean: true,
-  },
-  module: {
-    rules: [
-      {
-        test: /\.(js|jsx)$/,
-        exclude: /node_modules/,
-        use: ['babel-loader'],
-      },
-      {
-        test: /\.css$/,
-        use: ['style-loader', 'css-loader'],
-      },
-      {
-        test: /\.(png|jpe?g|gif|svg)$/i,
-        use: [
-          {
-            loader: 'file-loader',
-            options: {
-              name: '[path][name].[ext]',
-            },
-          },
-        ],
-      },
-    ],
-  },
-  plugins: [
-    new HtmlWebpackPlugin({
-      template: './public/index.html',
-    }),
-  ],
-  devServer: {
-    static: {
-      directory: path.join(__dirname, 'public'),
-    },
-    port: 3000,
-    open: true,
-    hot: true,
-    historyApiFallback: true,
-    compress: true,
-    proxy: [
-      {
-        context: ['/graphql'],
-        target: 'http://localhost:5000',
-        secure: false,
-      },
-    ],
-  },
-  optimization: {
-    runtimeChunk: 'single', // Ensure runtime chunk is handled correctly
-  },
+	mode: 'development',
+	entry: './src/index.js',
+	output: {
+		path: path.resolve(__dirname, 'dist'),
+		filename: '[name].[contenthash].js',
+		publicPath: '/',
+		clean: true,
+	},
+	module: {
+		rules: [
+			{
+				test: /\.(js|jsx)$/,
+				exclude: /node_modules/,
+				use: {
+					loader: 'babel-loader',
+					options: {
+						presets: ['@babel/preset-env', '@babel/preset-react'],
+					},
+				},
+			},
+			{
+				test: /\.css$/,
+				use: ['style-loader', 'css-loader'],
+			},
+			{
+				test: /\.(png|jpe?g|gif|svg)$/i,
+				use: [
+					{
+						loader: 'file-loader',
+						options: {
+							name: '[path][name].[ext]',
+						},
+					},
+				],
+			},
+		],
+	},
+	plugins: [
+		new HtmlWebpackPlugin({
+			template: './public/index.html',
+		}),
+		new CompressionPlugin({
+			filename: '[path][base].gz',
+			algorithm: 'gzip',
+			test: /\.(js|css|html|svg)$/,
+			threshold: 10240,
+			minRatio: 0.8,
+		}),
+	],
+	devServer: {
+		static: {
+			directory: path.join(__dirname, 'public'),
+		},
+		port: 3000,
+		open: true,
+		hot: true,
+		historyApiFallback: true,
+		compress: true,
+		proxy: [
+			{
+				context: ['/graphql'],
+				target: 'http://localhost:5000',
+				secure: false,
+			},
+		],
+	},
+	optimization: {
+		minimize: true,
+		minimizer: [
+			new TerserPlugin({
+				terserOptions: {
+					compress: {
+						drop_console: true,
+					},
+				},
+			}),
+			new CssMinimizerPlugin(),
+		],
+		splitChunks: {
+			chunks: 'all',
+		},
+		runtimeChunk: 'single', // Ensure runtime chunk is handled correctly
+	},
+	resolve: {
+		extensions: ['.js', '.jsx'],
+	},
 };

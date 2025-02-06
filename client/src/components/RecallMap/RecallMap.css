@@ -1,0 +1,31 @@
+.leaflet-popup-content p {
+  margin: 0;
+}
+
+.leaflet-popup-content h4 {
+  margin: 0;
+}
+
+.recall-map-container {
+  height: 100vh;
+  width: 100%;
+  position: fixed;
+  min-height: 400px;
+}
+
+.recall-map {
+  height: 100%;
+  width: 100%;
+}
+
+.leaflet-control {
+  z-index: 1000;
+}
+
+/* dark mode */
+/* .leaflet-layer,
+.leaflet-control-zoom-in,
+.leaflet-control-zoom-out,
+.leaflet-control-attribution {
+  filter: invert(100%) hue-rotate(180deg) brightness(95%) contrast(90%);
+} */

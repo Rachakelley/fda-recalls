@@ -1,0 +1,21 @@
+.recall-list {
+  margin-top: 10px;
+  overflow-y: auto;
+  max-height: 200px;
+}
+
+.recall-item {
+  padding: 8px 0;
+  border-bottom: 1px solid #eee;
+}
+
+.recall-item:last-child {
+  border-bottom: none;
+}
+
+.more-recalls {
+  text-align: center;
+  color: #666;
+  font-style: italic;
+  margin-top: 8px;
+}

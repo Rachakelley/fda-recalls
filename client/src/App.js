@@ -1,17 +1,20 @@
-import React from "react";
-import "./App.css";
-import FDARecalls from "./components/FDARecalls/FDARecalls";
-import Header from "./components/Header/Header";
+import React, { Suspense, lazy } from 'react';
+import './App.css';
+import Header from './components/Header/Header';
+
+const FDARecalls = lazy(() => import('./components/FDARecalls/FDARecalls'));
 
 function App() {
-  return (
-    <div className="App">
-      <Header />
-      <main className="App-main">
-        <FDARecalls />
-      </main>
-    </div>
-  );
+	return (
+		<div className='App'>
+			<Header />
+			<main className='App-main'>
+				<Suspense fallback={<div>Loading...</div>}>
+					<FDARecalls />
+				</Suspense>
+			</main>
+		</div>
+	);
 }
 
 export default App;

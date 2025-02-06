@@ -1,7 +1,4 @@
 .legend-wrapper {
-    position: absolute;
-    right: 10px;
-    top: 60px;
     display: flex;
     flex-direction: column;
     background: #ffffffc4;
@@ -11,7 +8,7 @@
     z-index: 1000;
 
     label {
-        display: flex;
+      display: flex;
     }
   }
   
