@@ -16,6 +16,7 @@ const LimitSelector = ({ limit, setLimit }) => {
 				MenuProps={{
 					disableScrollLock: true,
 					PaperProps: {
+						inert: true,
 						style: {
 							paddingRight: 0,
 							overflow: 'visible',

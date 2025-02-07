@@ -1,6 +1,8 @@
-const { buildSchema } = require("graphql");
+const { buildSchema } = require('graphql');
 
 const schema = buildSchema(`
+  scalar JSON
+  
   type Recall {
     product_description: String
     reason_for_recall: String
@@ -15,16 +17,48 @@ const schema = buildSchema(`
   type RecallResponse {
     total_results: Int
     results: [Recall]
+    stateGroups: JSON
   }
 
-  type StateBounds {
-    state: String!
-    coordinates: [[[[Float]]]]
+  type Properties {
+    name: String!
+    density: Float!
+  }
+
+  # Base Geometry interface
+  interface Geometry {
+    type: String!
+    coordinates: JSON!
+  }
+
+  # GeoJSON Feature
+  type Feature {
+    type: String!
+    geometry: Geometry!
+    properties: JSON
+  }
+
+  # GeoJSON FeatureCollection
+  type FeatureCollection {
+    type: String!
+    features: [Feature!]!
+  }
+
+  # Polygon implementation
+  type Polygon implements Geometry {
+    type: String!
+    coordinates: JSON!
+  }
+
+  # MultiPolygon implementation
+  type MultiPolygon implements Geometry {
+    type: String!
+    coordinates: JSON!
   }
 
   type Query {
     recalls(startDate: String, endDate: String, limit: Int): RecallResponse
-    stateBounds: [StateBounds!]!
+    stateBounds: FeatureCollection
   }
 `);
 

@@ -9,8 +9,9 @@ const RecallMap = ({
 	recalls,
 	stateBoundsData,
 	selectedClassifications,
-	setExpandedState,
+	setIsStateAccordionExpanded,
 	loadingRecallData,
+	isSidebarExpanded,
 }) => {
 	if ((!recalls || recalls.length === 0) && !loadingRecallData) {
 		return <div>No recalls found.</div>;
@@ -28,7 +29,8 @@ const RecallMap = ({
 					recalls={recalls}
 					stateBoundsData={stateBoundsData}
 					selectedClassifications={selectedClassifications}
-					setExpandedState={setExpandedState}
+					setIsStateAccordionExpanded={setIsStateAccordionExpanded}
+					isSidebarExpanded={isSidebarExpanded}
 				/>
 			</MapContainer>
 		</div>

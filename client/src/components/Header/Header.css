@@ -19,3 +19,9 @@
   margin-right: 2rem;
   max-width: 100%;
 }
+
+.App.dark .recalls-header {
+  background-color: #1f2225;
+  color: #e5dddd;
+  border: 1px solid #000000ad;
+}

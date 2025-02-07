@@ -1,29 +1,37 @@
-import React, { useEffect, useRef } from 'react';
+import React, { Suspense, useEffect, useRef, useState } from 'react';
 import {
 	Accordion,
 	AccordionSummary,
-	AccordionDetails,
 	Box,
 	Chip,
+	CircularProgress,
 	Typography,
 } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { stateCoordinates } from '../constants';
+import AccordionContent from './AccordionContent';
+import './RecallsAccordion.css';
 
-const RecallsAccordion = ({ recalls, expandedState, setExpandedState }) => {
+const RecallsAccordion = ({
+	recalls,
+	isStateAccordionExpanded,
+	setIsStateAccordionExpanded,
+	isSidebarExpanded,
+}) => {
+	const [recallsDisplayCount, setRecallsDisplayCount] = useState(5);
 	const expandedAccordionRef = useRef(null);
 	const groupedRecalls = recalls?.stateGroups || {};
 
 	useEffect(() => {
-		if (expandedState) {
+		if (isStateAccordionExpanded) {
 			const element = document.getElementById(
-				`${expandedState.replace(/\s+/g, '-')}-header`
+				`${isStateAccordionExpanded.replace(/\s+/g, '-')}-header`
 			);
-			if (element) {
+			if (element && isSidebarExpanded) {
 				element.scrollIntoView({ behavior: 'smooth', block: 'start' });
 			}
 		}
-	}, [expandedState]);
+	}, [isStateAccordionExpanded]);
 
 	const getRecallCount = (classifications) => {
 		return Object.values(classifications).flat().length;
@@ -34,7 +42,7 @@ const RecallsAccordion = ({ recalls, expandedState, setExpandedState }) => {
 	};
 
 	const handleChange = (state) => (event, isExpanded) => {
-		setExpandedState(isExpanded ? getFullStateName(state) : false);
+		setIsStateAccordionExpanded(isExpanded ? getFullStateName(state) : false);
 	};
 
 	return Object.entries(groupedRecalls)
@@ -48,63 +56,60 @@ const RecallsAccordion = ({ recalls, expandedState, setExpandedState }) => {
 			)
 		)
 		.map(([state, classifications]) => (
-			<Accordion
+			<div
+				className='state-accordion-wrapper'
 				key={state}
-				expanded={expandedState === getFullStateName(state)}
-				onChange={handleChange(state)}
 			>
-				<AccordionSummary
-					ref={
-						expandedState === getFullStateName(state)
-							? expandedAccordionRef
-							: null
-					}
-					expandIcon={<ExpandMoreIcon />}
-					aria-controls={`${state}-content`}
-					id={`${getFullStateName(state).replace(/\s+/g, '-')}-header`}
+				<Accordion
+					expanded={isStateAccordionExpanded === getFullStateName(state)}
+					onChange={handleChange(state)}
 				>
-					<Typography sx={{ flex: 1 }}>{getFullStateName(state)}</Typography>
-					<Chip
-						label={getRecallCount(classifications)}
-						size='small'
-						sx={{
-							marginRight: 2,
-							backgroundColor: '#e0e0e0',
-						}}
-					/>
-				</AccordionSummary>
-				<AccordionDetails>
-					{Object.entries(classifications)
-						.filter(([_, recalls]) => recalls && recalls.length > 0)
-						.map(([classification, recalls]) => (
-							<div key={`${state}-${classification}`}>
-								<Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-									<Typography variant='subtitle1'>{classification}</Typography>
-									<Chip
-										label={
-											recalls.filter(
-												(recall) => recall.classification === classification
-											).length
-										}
-										size='small'
-										color='primary'
-									/>
+					<AccordionSummary
+						className='state-accordion'
+						key={`${state}-summary`}
+						ref={
+							isStateAccordionExpanded === getFullStateName(state)
+								? expandedAccordionRef
+								: null
+						}
+						expandIcon={<ExpandMoreIcon />}
+						aria-controls={`${state}-content`}
+						id={`${getFullStateName(state).replace(/\s+/g, '-')}-header`}
+					>
+						<Typography
+							variant='subtitle1'
+							sx={{ flex: 1 }}
+						>
+							{getFullStateName(state)}
+						</Typography>
+						<Chip
+							label={getRecallCount(classifications)}
+							size='small'
+							sx={{
+								marginRight: 2,
+								backgroundColor: '#e0e0e0',
+							}}
+						/>
+					</AccordionSummary>
+					{isStateAccordionExpanded === getFullStateName(state) && (
+						<Suspense
+							fallback={
+								<Box sx={{ display: 'flex', justifyContent: 'center', p: 2 }}>
+									<CircularProgress />
 								</Box>
-								<div>
-									{recalls.slice(0, 5).map((recall, idx) => (
-										<div key={idx}>
-											<h5>{recall.recalling_firm}</h5>
-											<p>{recall.product_description}</p>
-											<p>
-												<strong>Reason:</strong> {recall.reason_for_recall}
-											</p>
-										</div>
-									))}
-								</div>
-							</div>
-						))}
-				</AccordionDetails>
-			</Accordion>
+							}
+						>
+							<AccordionContent
+								recalls={Object.entries(classifications).filter(
+									([_, recalls]) => recalls && recalls.length > 0
+								)}
+								recallsDisplayCount={recallsDisplayCount}
+								state={state}
+							/>
+						</Suspense>
+					)}
+				</Accordion>
+			</div>
 		));
 };
 

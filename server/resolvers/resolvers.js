@@ -1,107 +1,135 @@
-const { ApolloError } = require("apollo-server");
-
-const FDA_API_URL =
-  process.env.FDA_API_URL || "https://api.fda.gov/food/enforcement.json";
-const US_STATE_BOUNDS_URL = "https://public.opendatasoft.com/api/explore/v2.1/catalog/datasets/us-state-boundaries/records?limit=56"
-
-const formatCoordinates = (coordinates, type) => {
-  if (!coordinates || !Array.isArray(coordinates)) {
-    return null;
-  }
-
-  if (type === "MultiPolygon") {
-    return coordinates;
-  } else if (type === "Polygon") {
-    return [coordinates];
-  }
-
-  return null;
-};
+const { ApolloError } = require('apollo-server');
+const path = require('path');
+const fs = require('fs').promises;
+const GraphQLJSON = require('graphql-type-json');
+const {
+	getStatesFromDistribution,
+	loadGeoJSON,
+	validateGeoData,
+	validateGeoFile,
+} = require('./helpers');
+const { FDA_API_URL } = require('./constants');
 
 const resolvers = {
-  Query: {
-    recalls: async (_, { startDate, endDate, limit = 10 }) => {
-      if (!startDate) {
-        throw new ApolloError(
-          "Missing required startDate parameter",
-          "BAD_REQUEST"
-        );
-      }
-      if (!endDate) {
-        throw new ApolloError(
-          "Missing required endDate parameter",
-          "BAD_REQUEST"
-        );
-      }
+	JSON: GraphQLJSON,
 
-      // Format the query properly with encoded parameters
-      const searchQuery = encodeURIComponent(
-        `report_date:[${startDate} TO ${endDate}] AND country:"United States"`
-      );
-      const FDA_API_QUERY = `search=${searchQuery}&limit=${limit}`;
+	Feature: {
+		type: (parent) => parent.type,
+		properties: (parent) => parent.properties,
+		geometry: (parent) => parent.geometry,
+	},
 
-      console.log("FDA API Request:", `${FDA_API_URL}?${FDA_API_QUERY}`);
+	Geometry: {
+		__resolveType(geometry) {
+			if (geometry.type === 'Polygon') return 'Polygon';
+			if (geometry.type === 'MultiPolygon') return 'MultiPolygon';
+			return null;
+		},
+	},
+	Query: {
+		recalls: async (_, { startDate, endDate, limit = 10 }) => {
+			if (!startDate || !endDate) {
+				throw new ApolloError(
+					'Missing required date parameters',
+					'BAD_REQUEST'
+				);
+			}
 
-      try {
-        const response = await fetch(`${FDA_API_URL}?${FDA_API_QUERY}`);
-        const data = await response.json();
+			// Format the query properly with encoded parameters
+			const searchQuery = encodeURIComponent(
+				`report_date:[${startDate} TO ${endDate}] AND country:"United States"`
+			);
+			const FDA_API_QUERY = `search=${searchQuery}&limit=${limit}`;
 
-        if (!data || !data.results) {
-          throw new ApolloError("Invalid API response format", "API_ERROR");
-        }
+			// console.log('FDA API Request:', `${FDA_API_URL}?${FDA_API_QUERY}`);
 
-        return {
-          total_results: data.meta.results.total || 0,
-          results: data.results || [],
-        };
-      } catch (error) {
-        console.error("FDA API Error:", error);
-        throw new ApolloError(
-          `Failed to fetch recalls: ${error.message}`,
-          "API_ERROR",
-          { originalError: error }
-        );
-      }
-    },
-    stateBounds: async () => {
-      try {
-        const response = await fetch(US_STATE_BOUNDS_URL);
-        const data = await response.json();
+			try {
+				const response = await fetch(`${FDA_API_URL}?${FDA_API_QUERY}`);
+				const data = await response.json();
 
-        console.log('State Bounds API Request:', data.results);
+				if (!data.results) {
+					throw new ApolloError('No results found', 'NOT_FOUND');
+				}
 
-        if (!data || !data.results) {
-          throw new ApolloError("Invalid API response format", "API_ERROR");
-        }
+				const results = data?.results || [];
 
-        return data.results.map(item => {
-          return {
-            state: item.basename,
-            coordinates: () => {
-              try {
-                const geometry = item.st_asgeojson.geometry;
-                if (!geometry || !geometry.coordinates) {
-                  console.warn(`Missing coordinates data for state: ${item.basename}`);
-                  return null;
-                }
-                return formatCoordinates(geometry.coordinates, geometry.type);
-              } catch (error) {
-                console.error(`Error formatting coordinates for state ${item.basename}:`, error);
-                return null;
-              }
-            }
-          };
-        })
-      } catch (error) {
-        console.error("State Bounds API Error:", error);
-        throw new ApolloError(
-          "Failed to fetch state bounds data",
-          "API_ERROR",
-          { originalError: error }
-        );
-      }
-    }
-  }
+				// console.log(`Fetched ${results.length} recalls with limit ${limit}`);
+
+				const stateGroups = results.reduce((acc, recall) => {
+					try {
+						const states = getStatesFromDistribution(
+							recall.distribution_pattern
+						);
+						// console.log(`Processing recall states:`, states);
+
+						states?.forEach((state) => {
+							if (!acc[state]) {
+								acc[state] = {
+									'Class I': [],
+									'Class II': [],
+									'Class III': [],
+								};
+							}
+							if (!acc[state][recall.classification]) {
+								acc[state][recall.classification] = [];
+							}
+							acc[state][recall.classification].push(recall);
+						});
+						return acc;
+					} catch (error) {
+						console.error('Error processing recall:', error);
+						return acc;
+					}
+				}, {});
+
+				// console.log('Processing recall states:', stateGroups);
+
+				// Alphabetize the stateGroups with proper locale sorting
+				const sortedStateGroups = Object.fromEntries(
+					Object.entries(stateGroups).sort(([a], [b]) =>
+						a.localeCompare(b, 'en-US', { sensitivity: 'base' })
+					)
+				);
+
+				return {
+					total_results: data.meta?.results?.total || 0,
+					results: data.results || [],
+					stateGroups: sortedStateGroups,
+				};
+			} catch (error) {
+				throw new ApolloError('Failed to fetch FDA recall data', 'API_ERROR');
+			}
+		},
+		stateBounds: async () => {
+			try {
+				const dataPath = path.resolve(
+					__dirname,
+					'..',
+					'data',
+					'georef-united-states-of-america-state.json'
+				);
+
+				await validateGeoFile(dataPath);
+				const geoData = await loadGeoJSON(dataPath);
+				validateGeoData(geoData);
+
+				return {
+					type: 'FeatureCollection',
+					features: geoData.features.map((feature) => ({
+						type: feature.type,
+						properties: feature.properties,
+						geometry: {
+							type: feature.geometry.type,
+							coordinates: feature.geometry.coordinates,
+						},
+					})),
+				};
+			} catch (error) {
+				console.error('Error processing state bounds:', error);
+				throw error;
+			}
+		},
+	},
 };
 
 module.exports = resolvers;

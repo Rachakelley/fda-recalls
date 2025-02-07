@@ -19,3 +19,8 @@
   font-style: italic;
   margin-top: 8px;
 }
+
+.App.dark .leaflet-popup-content-wrapper {
+  background-color: #1f2225;
+  color: #e5dddd;
+}

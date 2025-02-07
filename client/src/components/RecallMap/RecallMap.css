@@ -23,9 +23,9 @@
 }
 
 /* dark mode */
-/* .leaflet-layer,
-.leaflet-control-zoom-in,
-.leaflet-control-zoom-out,
-.leaflet-control-attribution {
+.App.dark .leaflet-layer,
+.App.dark .leaflet-control-zoom-in,
+.App.dark .leaflet-control-zoom-out,
+.App.dark .leaflet-control-attribution {
   filter: invert(100%) hue-rotate(180deg) brightness(95%) contrast(90%);
-} */
+}

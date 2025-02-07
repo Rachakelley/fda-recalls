@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { TileLayer, GeoJSON, Marker, Polygon } from 'react-leaflet';
+import { TileLayer, GeoJSON, Marker } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 import {
@@ -12,11 +12,28 @@ import { stateCoordinates } from '../constants';
 import RecallPopup from '../RecallPopup/RecallPopup';
 import './RecallMap.css';
 
+const highlightState = (e) => {
+	e.target.setStyle(polygonHighlightStyle);
+};
+
+const resetHighlight = (e) => {
+	e.target.setStyle(polygonBaseStyle);
+};
+
+const handleMouseOver = (e) => {
+	e.target.setStyle(polygonHighlightStyle);
+};
+
+const handleMouseOut = (e) => {
+	e.target.setStyle(polygonBaseStyle);
+};
+
 const MapContent = ({
 	recalls = [],
 	stateBoundsData,
 	selectedClassifications,
-	setExpandedState,
+	setIsStateAccordionExpanded,
+	isSidebarExpanded,
 }) => {
 	// Fix marker icon issues
 	delete L.Icon.Default.prototype._getIconUrl;
@@ -26,28 +43,33 @@ const MapContent = ({
 		[recalls]
 	);
 
+	const zoomToState = (e) => {
+		const map = e.target._map;
+		const bounds = e.target.getBounds();
+
+		map.flyToBounds(bounds, {
+			duration: 1.5,
+			easeLinearity: 0.25,
+			maxZoom: 5,
+			minZoom: 5,
+			paddingBottomRight: isSidebarExpanded ? [275, 100] : [0, 75], // Offset for sidebar
+		});
+	};
+
 	const onEachFeature = (feature, layer) => {
 		if (!feature.properties) return;
 
 		layer.bindPopup(feature.properties.name);
 
 		layer.on({
-			mouseover: (e) => {
-				const layer = e.target;
-				layer.setStyle(polygonHighlightStyle);
-			},
-			mouseout: (e) => {
-				const layer = e.target;
-				layer.setStyle(polygonBaseStyle);
-			},
+			mouseover: handleMouseOver,
+			mouseout: handleMouseOut,
 			click: (e) => {
-				const map = e.target._map;
-				map.flyToBounds(e.target.getBounds(), {
-					duration: 1.5,
-					easeLinearity: 0.25,
-				});
-				setExpandedState(feature.properties.name);
+				highlightState(e);
+				zoomToState(e);
+				setIsStateAccordionExpanded(e.target.feature.properties.name);
 			},
+			popupclose: resetHighlight,
 		});
 	};
 
@@ -59,6 +81,7 @@ const MapContent = ({
 			/>
 			{stateBoundsData?.features?.length > 0 && (
 				<GeoJSON
+					key={JSON.stringify(isSidebarExpanded)} // Force re-render on sidebar toggle, otherwise isSidebarExpanded value is stale
 					data={stateBoundsData}
 					style={polygonBaseStyle}
 					onEachFeature={onEachFeature}

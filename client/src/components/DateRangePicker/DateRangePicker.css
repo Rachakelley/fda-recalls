@@ -1,11 +1,11 @@
 .date-range-picker {
   min-width: fit-content;
 
-  > div {
+  >div {
     max-width: 160px;
   }
-  
-  > div:first-child {
+
+  >div:first-child {
     margin-right: 5px;
   }
 
@@ -27,7 +27,6 @@
   border: 1px solid #ddd;
   border-radius: 4px;
   font-size: 14px;
-  color: #333;
   width: 130px;
 }
 

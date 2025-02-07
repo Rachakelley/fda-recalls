@@ -1,9 +1,9 @@
-import * as React from 'react';
+import React, { useState } from 'react';
 import Popover from '@mui/material/Popover';
 import Typography from '@mui/material/Typography';
 
 const HoverPopover = ({ component, text }) => {
-	const [anchorEl, setAnchorEl] = React.useState(null);
+	const [anchorEl, setAnchorEl] = useState(null);
 
 	const handlePopoverOpen = (event) => {
 		setAnchorEl(event.currentTarget);

@@ -1,0 +1,14 @@
+.recalls-header {
+  display: flex;
+  align-items: center;
+  border: 1px solid #b6daff66;
+}
+
+.recalls-date-text {
+  padding: 15px;
+  min-width: 200px;
+
+  p {
+    margin: 0;
+  }
+}

@@ -1,12 +1,14 @@
-import React, { Suspense, lazy } from 'react';
-import './App.css';
+import React, { lazy, Suspense, useContext } from 'react';
+import { ThemeContextProvider, ThemeContext } from './context/ThemeContext';
 import Header from './components/Header/Header';
+import './App.css';
+const FDARecalls = lazy(() => import('./pages/FDARecalls/FDARecalls'));
 
-const FDARecalls = lazy(() => import('./components/FDARecalls/FDARecalls'));
+function AppContent() {
+	const { mode } = useContext(ThemeContext);
 
-function App() {
 	return (
-		<div className='App'>
+		<div className={`App ${mode}`}>
 			<Header />
 			<main className='App-main'>
 				<Suspense fallback={<div>Loading...</div>}>
@@ -14,6 +16,14 @@ function App() {
 				</Suspense>
 			</main>
 		</div>
+	);
+}
+
+function App() {
+	return (
+		<ThemeContextProvider>
+			<AppContent />
+		</ThemeContextProvider>
 	);
 }
 

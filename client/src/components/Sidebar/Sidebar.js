@@ -1,33 +1,43 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Box, IconButton } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
-import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
+import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import RecallsAccordion from './RecallsAccordion';
 import './Sidebar.css';
 
-const Sidebar = ({ recalls, expandedState, setExpandedState }) => {
-	const [open, setOpen] = useState(true);
-
+const Sidebar = ({
+	recalls,
+	isStateAccordionExpanded,
+	setIsStateAccordionExpanded,
+	isSidebarExpanded,
+	onSidebarToggle,
+}) => {
 	return (
-		<Box sx={{ display: 'flex', position: 'relative' }}>
+		<Box
+			sx={{
+				display: 'flex',
+				position: 'relative',
+			}}
+		>
 			<IconButton
 				className='sidebar-tab'
-				onClick={() => setOpen(!open)}
+				onClick={() => onSidebarToggle()}
 			>
-				{open ? <ChevronLeftIcon /> : <MenuIcon />}
+				{isSidebarExpanded ? <ChevronRightIcon /> : <MenuIcon />}
 			</IconButton>
-			<div className={`sidebar ${open ? 'open' : ''}`}>
+			<div className={`sidebar ${isSidebarExpanded ? 'open' : ''}`}>
 				<Box
 					className='sidebar-content'
 					sx={{
-						width: open ? 'fit-content' : 0,
+						width: isSidebarExpanded ? 'fit-content' : 0,
 					}}
 				>
 					<RecallsAccordion
 						{...{
 							recalls,
-							expandedState,
-							setExpandedState,
+							isStateAccordionExpanded,
+							setIsStateAccordionExpanded,
+							isSidebarExpanded,
 						}}
 					/>
 				</Box>

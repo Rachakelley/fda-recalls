@@ -1,4 +1,5 @@
 import React from 'react';
+import ThemeToggle from '../ThemeToggle/ThemeToggle';
 import './Header.css';
 
 const Header = () => {
@@ -9,6 +10,7 @@ const Header = () => {
 				alt='FDA Logo'
 				className='fda-logo'
 			/>
+			<ThemeToggle />
 		</header>
 	);
 };

@@ -30,15 +30,15 @@ module.exports = {
 				use: ['style-loader', 'css-loader'],
 			},
 			{
-				test: /\.(png|jpe?g|gif|svg)$/i,
-				use: [
-					{
-						loader: 'file-loader',
-						options: {
-							name: '[path][name].[ext]',
-						},
-					},
-				],
+				test: /\.(woff|woff2|eot|ttf|otf)$/i,
+				type: 'asset/resource',
+				generator: {
+					filename: 'fonts/[hash][ext][query]',
+				},
+			},
+			{
+				test: /\.(png|svg|jpg|jpeg|gif)$/i,
+				type: 'asset/resource',
 			},
 		],
 	},
@@ -89,6 +89,16 @@ module.exports = {
 		runtimeChunk: 'single', // Ensure runtime chunk is handled correctly
 	},
 	resolve: {
-		extensions: ['.js', '.jsx'],
+		extensions: [
+			'.js',
+			'.jsx',
+			'.json',
+			'.woff',
+			'.woff2',
+			'.eot',
+			'.ttf',
+			'.otf',
+		],
+		modules: ['node_modules'],
 	},
 };

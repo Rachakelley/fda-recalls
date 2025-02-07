@@ -1,0 +1,54 @@
+.fda-recalls {
+  position: relative;
+  height: 100vh;
+  top: 60px;
+}
+
+.map-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: center;
+  align-items: stretch;
+  padding: 1rem;
+  flex-direction: column;
+}
+
+.map-filters-wrapper {
+  width: fit-content;
+  background: #fefefee3;
+  left: 0;
+  right: 0;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  position: fixed;
+  bottom: -100%;
+  z-index: 1000;
+  transition: bottom 0.3s ease-in-out;
+  overflow-y: auto;
+}
+
+.map-filters-wrapper.expanded {
+  bottom: 0;
+}
+
+.sidebar-loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  width: 35vw;
+  position: fixed;
+  right: 0;
+  top: 0;
+  background-color: white;
+  border-right: 1px solid #e0e0e0;
+  z-index: 1000;
+}
+
+.App.dark .map-filters-wrapper {
+  background-color: #1e1e1e;
+  border: 1px solid #131314;
+  color: white;
+}
