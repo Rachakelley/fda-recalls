@@ -34,11 +34,13 @@ const FDARecalls = () => {
 
 	const recalls = useMemo(() => {
 		const results = data?.recalls?.results || [];
-		return results.filter(
+		const filteredResults = results.filter(
 			(recall) =>
 				Object.keys(selectedClassifications).length === 0 ||
 				Object.keys(selectedClassifications).includes(recall.classification)
 		);
+		console.log('filteredResults:', filteredResults);
+		return filteredResults;
 	}, [data?.recalls?.results, selectedClassifications]);
 
 	const handleSidebarToggle = () => {

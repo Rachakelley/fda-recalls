@@ -27,11 +27,26 @@ const AccordionContent = ({ recalls, recallsDisplayCount, state }) => {
 
 	const getClassificationColorBox = (classification) => {
 		if (classification === 'Class I') {
-			return <div className='color-box class-i'></div>;
+			return (
+				<div
+					data-testid='class-i-box'
+					className='color-box class-i'
+				></div>
+			);
 		} else if (classification === 'Class II') {
-			return <div className='color-box class-ii'></div>;
+			return (
+				<div
+					data-testid='class-ii-box'
+					className='color-box class-ii'
+				></div>
+			);
 		} else if (classification === 'Class III') {
-			return <div className='color-box class-iii'></div>;
+			return (
+				<div
+					data-testid='class-iii-box'
+					className='color-box class-iii'
+				></div>
+			);
 		}
 	};
 

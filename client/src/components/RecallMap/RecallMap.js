@@ -1,4 +1,5 @@
 import React from 'react';
+import { CircularProgress } from '@mui/material';
 import { MapContainer } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import { CENTER_COORDS, DEFAULT_ZOOM, MIN_ZOOM } from '../constants';
@@ -15,6 +16,10 @@ const RecallMap = ({
 }) => {
 	if ((!recalls || recalls.length === 0) && !loadingRecallData) {
 		return <div>No recalls found.</div>;
+	}
+
+	if (loadingRecallData) {
+		return <CircularProgress />;
 	}
 
 	return (

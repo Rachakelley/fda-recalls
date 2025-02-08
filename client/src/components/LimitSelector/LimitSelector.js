@@ -7,8 +7,10 @@ const LimitSelector = ({ limit, setLimit }) => {
 
 	return (
 		<FormControl className='limit-selector-root'>
-			<InputLabel>Results</InputLabel>
+			<InputLabel id='results-limit-label'>Results</InputLabel>
 			<Select
+				labelId='results-limit-label'
+				id='results-limit-select'
 				value={limit}
 				onChange={(e) => setLimit(e.target.value)}
 				label='Results'
@@ -16,7 +18,6 @@ const LimitSelector = ({ limit, setLimit }) => {
 				MenuProps={{
 					disableScrollLock: true,
 					PaperProps: {
-						inert: true,
 						style: {
 							paddingRight: 0,
 							overflow: 'visible',
