@@ -12,6 +12,11 @@ const PORT = process.env.PORT || 5000;
 async function startApolloServer() {
 	const app = express();
 
+	app.use(express.static(path.join(__dirname, '../client/dist')));
+	app.get('*', (req, res) => {
+		res.sendFile(path.join(__dirname, '../client/dist', 'index.html'));
+	});
+
 	// Request logging middleware
 	app.use((req, res, next) => {
 		console.log(`${new Date().toISOString()} - ${req.method} ${req.url}`);
