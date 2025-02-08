@@ -54,6 +54,7 @@ async function startApolloServer() {
 	const server = new ApolloServer({
 		typeDefs: schema,
 		resolvers,
+		cache: 'bounded',
 		context: ({ req, res }) => ({ req, res }),
 		formatError: (error) => {
 			console.error('GraphQL Error:', error);
@@ -87,10 +88,8 @@ async function startApolloServer() {
 
 	// For local development
 	if (process.env.NODE_ENV !== 'production') {
-		app.listen(PORT, () => {
-			console.log(
-				`🚀 Server ready at http://localhost:${PORT}${server.graphqlPath}`
-			);
+		server.listen().then(({ url }) => {
+			console.log(`🚀 Server ready at ${url}`);
 		});
 	}
 

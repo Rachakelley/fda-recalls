@@ -5,7 +5,7 @@ const CssMinimizerPlugin = require('css-minimizer-webpack-plugin');
 const CompressionPlugin = require('compression-webpack-plugin');
 
 module.exports = {
-	mode: 'development',
+	// mode: 'development',
 	entry: './src/index.js',
 	output: {
 		path: path.resolve(__dirname, 'dist'),
@@ -17,6 +17,7 @@ module.exports = {
 		rules: [
 			{
 				test: /\.(js|jsx)$/,
+
 				exclude: /node_modules/,
 				use: {
 					loader: 'babel-loader',
@@ -39,6 +40,9 @@ module.exports = {
 			{
 				test: /\.(png|svg|jpg|jpeg|gif)$/i,
 				type: 'asset/resource',
+				generator: {
+					filename: 'static/images/[hash][ext][query]', // Updated path
+				},
 			},
 		],
 	},
@@ -58,11 +62,10 @@ module.exports = {
 		static: {
 			directory: path.join(__dirname, 'public'),
 		},
-		port: 3000,
+		port: 9000,
 		open: true,
 		hot: true,
 		historyApiFallback: true,
-		compress: true,
 		compress: true,
 		proxy: [
 			{

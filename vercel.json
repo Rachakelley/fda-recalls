@@ -9,9 +9,55 @@
 			"src": "/api/graphql",
 			"dest": "server/server.js"
 		},
-		{ "src": "/(.*)", "dest": "client/dist/$1" }
+		{
+			"src": "/static/images/(.*)",
+			"headers": { "cache-control": "public, max-age=31536000, immutable" },
+			"dest": "client/dist/static/images/$1"
+		},
+		{
+			"src": "/fonts/(.*)",
+			"headers": { "cache-control": "public, max-age=31536000, immutable" },
+			"dest": "client/dist/fonts/$1"
+		},
+		{
+			"src": "/(.*)\\.js$",
+			"headers": {
+				"cache-control": "public, max-age=31536000, immutable",
+				"content-type": "application/javascript"
+			},
+			"dest": "client/dist/$1.js"
+		},
+		{
+			"src": "/(.*)\\.css$",
+			"headers": {
+				"cache-control": "public, max-age=31536000, immutable",
+				"content-type": "text/css"
+			},
+			"dest": "client/dist/$1.css"
+		},
+		{
+			"src": "/(.*)\\.svg$",
+			"headers": {
+				"cache-control": "public, max-age=31536000, immutable",
+				"content-type": "image/svg+xml"
+			},
+			"dest": "client/dist/$1.svg"
+		},
+		{
+			"src": "/(.*)\\.ico$",
+			"headers": {
+				"cache-control": "public, max-age=31536000, immutable",
+				"content-type": "image/x-icon"
+			},
+			"dest": "client/dist/$1.ico"
+		},
+		{
+			"src": "/(.*)",
+			"headers": { "cache-control": "public, max-age=0, must-revalidate" },
+			"dest": "client/dist/index.html"
+		}
 	],
 	"env": {
-		"NODE_ENV": "development"
+		"NODE_ENV": "production"
 	}
 }

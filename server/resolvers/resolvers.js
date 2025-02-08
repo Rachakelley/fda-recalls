@@ -32,6 +32,8 @@ const resolvers = {
 	},
 	Query: {
 		recalls: async (_, { startDate, endDate, limit = 10 }) => {
+			console.log('Environment:', process.env.NODE_ENV);
+			console.log('FDA_API_URL:', FDA_API_URL);
 			if (!startDate || !endDate) {
 				throw new ApolloError(
 					'Missing required date parameters',
@@ -44,13 +46,28 @@ const resolvers = {
 				`report_date:[${startDate} TO ${endDate}] AND country:"United States"`
 			);
 			const FDA_API_QUERY = `search=${searchQuery}&limit=${limit}`;
+			const fullUrl = `${FDA_API_URL}?${FDA_API_QUERY}`;
 
-			// console.log('FDA API Request:', `${FDA_API_URL}?${FDA_API_QUERY}`);
+			console.log('Making FDA API request to:', fullUrl);
 
 			try {
-				const response = await fetch(`${FDA_API_URL}?${FDA_API_QUERY}`);
-				const data = await response.json();
+				const response = await fetch(fullUrl);
 
+				if (!response.ok) {
+					console.error('FDA API Response Error:', {
+						status: response.status,
+						statusText: response.statusText,
+						headers: Object.fromEntries(response.headers),
+					});
+					throw new Error(`FDA API returned status ${response.status}`);
+				}
+
+				const data = await response.json();
+				console.log('FDA API Response metadata:', {
+					hasResults: !!data.results,
+					totalResults: data.meta?.results?.total,
+					resultCount: data.results?.length,
+				});
 				if (!data.results) {
 					throw new ApolloError('No results found', 'NOT_FOUND');
 				}
@@ -101,7 +118,15 @@ const resolvers = {
 					stateGroups: sortedStateGroups,
 				};
 			} catch (error) {
-				throw new ApolloError('Failed to fetch FDA recall data', 'API_ERROR');
+				console.error('FDA API Error:', {
+					message: error.message,
+					stack: error.stack,
+					url: `${FDA_API_URL}?${FDA_API_QUERY}`,
+				});
+				throw new ApolloError(
+					`Failed to fetch FDA recall data: ${error.message}`,
+					'API_ERROR'
+				);
 			}
 		},
 		stateBounds: async () => {
