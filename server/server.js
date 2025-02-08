@@ -1,13 +1,20 @@
-require('dotenv').config();
+import dotenv from 'dotenv';
+dotenv.config();
 
-const express = require('express');
-const { ApolloServer } = require('apollo-server-express');
-const cors = require('cors');
-const schema = require('./schema/schema');
-const resolvers = require('./resolvers/resolvers');
+import path from 'path';
+import { fileURLToPath } from 'url';
+import express from 'express';
+import { ApolloServer } from 'apollo-server-express';
+import cors from 'cors';
+import compression from 'compression';
+import schema from './schema/schema.js';
+import resolvers from './resolvers/resolvers.js';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const CORS_ORIGIN = process.env.CORS_ORIGIN || 'http://localhost:3000';
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 8000;
 
 async function startApolloServer() {
 	const app = express();
@@ -34,7 +41,6 @@ async function startApolloServer() {
 	);
 
 	// Add response compression
-	const compression = require('compression');
 	app.use(compression());
 
 	// Add caching headers middleware

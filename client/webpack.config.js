@@ -66,7 +66,7 @@ module.exports = {
 		proxy: [
 			{
 				context: ['/graphql'],
-				target: 'http://localhost:5000',
+				target: 'http://localhost:8000',
 				secure: false,
 			},
 		],

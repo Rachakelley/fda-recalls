@@ -1,14 +1,14 @@
-const { ApolloError } = require('apollo-server');
-const path = require('path');
-const fs = require('fs').promises;
-const GraphQLJSON = require('graphql-type-json');
-const {
+import { ApolloError } from 'apollo-server';
+import path from 'path';
+import { promises as fs } from 'fs';
+import GraphQLJSON from 'graphql-type-json';
+import {
 	getStatesFromDistribution,
 	loadGeoJSON,
 	validateGeoData,
 	validateGeoFile,
-} = require('./helpers');
-const { FDA_API_URL } = require('./constants');
+} from './helpers.js';
+import { FDA_API_URL } from './constants.js';
 
 const resolvers = {
 	JSON: GraphQLJSON,
@@ -132,4 +132,4 @@ const resolvers = {
 	},
 };
 
-module.exports = resolvers;
+export default resolvers;

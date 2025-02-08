@@ -1,4 +1,4 @@
-const { buildSchema } = require('graphql');
+import { buildSchema } from 'graphql';
 
 const schema = buildSchema(`
   scalar JSON
@@ -62,4 +62,4 @@ const schema = buildSchema(`
   }
 `);
 
-module.exports = schema;
+export default schema;
