@@ -9,8 +9,7 @@
 	"scripts": {
 		"start": "node server.js",
 		"dev": "nodemon server.js",
-		"build": "npm install",
-		"vercel-build": "node server.js"
+		"build": "npm install"
 	},
 	"dependencies": {
 		"apollo-datasource-rest": "^3.7.0",

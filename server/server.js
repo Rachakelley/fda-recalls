@@ -20,10 +20,6 @@ async function startApolloServer() {
 	const app = express();
 
 	const clientDistPath = path.resolve(__dirname, '../client/dist');
-	app.use(express.static(clientDistPath));
-	app.get('*', (req, res) => {
-		res.sendFile(path.join(clientDistPath, 'index.html'));
-	});
 
 	// Request logging middleware
 	app.use((req, res, next) => {
@@ -34,7 +30,10 @@ async function startApolloServer() {
 	// CORS configuration
 	app.use(
 		cors({
-			origin: CORS_ORIGIN,
+			origin:
+				process.env.NODE_ENV === 'production'
+					? process.env.VERCEL_URL
+					: CORS_ORIGIN,
 			credentials: true,
 			methods: ['GET', 'POST', 'OPTIONS'],
 			allowedHeaders: ['Content-Type', 'Authorization'],
@@ -60,13 +59,16 @@ async function startApolloServer() {
 			console.error('GraphQL Error:', error);
 			return error;
 		},
-		playground: {
-			endpoint: '/api/graphql',
-			settings: {
-				'request.credentials': 'include',
-			},
-		},
-		introspection: true,
+		introspection: process.env.NODE_ENV !== 'production',
+		playground:
+			process.env.NODE_ENV !== 'production'
+				? {
+						endpoint: '/api/graphql',
+						settings: {
+							'request.credentials': 'include',
+						},
+				  }
+				: false,
 	});
 
 	await server.start();
@@ -77,12 +79,20 @@ async function startApolloServer() {
 		path: '/api/graphql',
 	});
 
-	// app.listen(PORT, () => {
-	// 	console.log(
-	// 		`🚀 Server ready at http://localhost:${PORT}${server.graphqlPath}`
-	// 	);
-	// 	console.log(`🚀 Playground available at http://localhost:${PORT}/graphql`);
-	// });
+	// Serve static files after API routes
+	app.use(express.static(clientDistPath));
+	app.get('*', (req, res) => {
+		res.sendFile(path.join(clientDistPath, 'index.html'));
+	});
+
+	// For local development
+	if (process.env.NODE_ENV !== 'production') {
+		app.listen(PORT, () => {
+			console.log(
+				`🚀 Server ready at http://localhost:${PORT}${server.graphqlPath}`
+			);
+		});
+	}
 
 	return app;
 }
