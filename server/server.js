@@ -19,9 +19,10 @@ const PORT = process.env.PORT || 8000;
 async function startApolloServer() {
 	const app = express();
 
-	app.use(express.static(path.join(__dirname, '../client/dist')));
+	const clientDistPath = path.resolve(__dirname, '../client/dist');
+	app.use(express.static(clientDistPath));
 	app.get('*', (req, res) => {
-		res.sendFile(path.join(__dirname, '../client/dist', 'index.html'));
+		res.sendFile(path.join(clientDistPath, 'index.html'));
 	});
 
 	// Request logging middleware
@@ -60,7 +61,7 @@ async function startApolloServer() {
 			return error;
 		},
 		playground: {
-			endpoint: '/graphql',
+			endpoint: '/api/graphql',
 			settings: {
 				'request.credentials': 'include',
 			},
@@ -72,19 +73,23 @@ async function startApolloServer() {
 
 	server.applyMiddleware({
 		app,
-		cors: false, // Disable Apollo CORS - using Express CORS
-		path: '/graphql',
+		cors: false,
+		path: '/api/graphql',
 	});
 
-	app.listen(PORT, () => {
-		console.log(
-			`🚀 Server ready at http://localhost:${PORT}${server.graphqlPath}`
-		);
-		console.log(`🚀 Playground available at http://localhost:${PORT}/graphql`);
-	});
+	// app.listen(PORT, () => {
+	// 	console.log(
+	// 		`🚀 Server ready at http://localhost:${PORT}${server.graphqlPath}`
+	// 	);
+	// 	console.log(`🚀 Playground available at http://localhost:${PORT}/graphql`);
+	// });
+
+	return app;
 }
 
-startApolloServer().catch((error) => {
+const server = await startApolloServer().catch((error) => {
 	console.error('Failed to start server:', error);
 	process.exit(1);
 });
+
+export default server;

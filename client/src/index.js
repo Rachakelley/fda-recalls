@@ -10,8 +10,11 @@ import './index.css';
 
 import { ApolloClient, InMemoryCache, ApolloProvider } from '@apollo/client';
 
+const GRAPHQL_ENDPOINT =
+	process.env.NODE_ENV === 'production' ? '/api/graphql' : '/graphql';
+
 const client = new ApolloClient({
-	uri: 'http://localhost:8000/graphql',
+	uri: GRAPHQL_ENDPOINT,
 	cache: new InMemoryCache({
 		typePolicies: {
 			Query: {

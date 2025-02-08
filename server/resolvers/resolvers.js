@@ -1,5 +1,6 @@
-import { ApolloError } from 'apollo-server';
 import path from 'path';
+import { fileURLToPath } from 'url';
+import { ApolloError } from 'apollo-server';
 import { promises as fs } from 'fs';
 import GraphQLJSON from 'graphql-type-json';
 import {
@@ -9,6 +10,9 @@ import {
 	validateGeoFile,
 } from './helpers.js';
 import { FDA_API_URL } from './constants.js';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const resolvers = {
 	JSON: GraphQLJSON,
@@ -102,11 +106,9 @@ const resolvers = {
 		},
 		stateBounds: async () => {
 			try {
-				const dataPath = path.resolve(
+				const dataPath = path.join(
 					__dirname,
-					'..',
-					'data',
-					'georef-united-states-of-america-state.json'
+					'../data/georef-united-states-of-america-state.json'
 				);
 
 				await validateGeoFile(dataPath);

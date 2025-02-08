@@ -63,11 +63,20 @@ module.exports = {
 		hot: true,
 		historyApiFallback: true,
 		compress: true,
+		compress: true,
 		proxy: [
 			{
 				context: ['/graphql'],
-				target: 'http://localhost:8000',
+				target:
+					process.env.NODE_ENV === 'production'
+						? '/api/graphql'
+						: 'http://localhost:8000',
 				secure: false,
+				pathRewrite: {
+					'^/graphql':
+						process.env.NODE_ENV === 'production' ? '/api/graphql' : '/graphql',
+				},
+				changeOrigin: true,
 			},
 		],
 	},

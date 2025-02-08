@@ -1,11 +1,20 @@
-import { createProxyMiddleware } from 'http-proxy-middleware';
+const { createProxyMiddleware } = require('http-proxy-middleware');
 
-export default function (app) {
+const target =
+	process.env.NODE_ENV === 'production'
+		? '/api/graphql'
+		: 'http://localhost:8000';
+
+module.exports = function (app) {
 	app.use(
 		'/graphql',
 		createProxyMiddleware({
-			target: 'http://localhost:8000',
+			target: target,
 			changeOrigin: true,
+			pathRewrite: {
+				'^/graphql':
+					process.env.NODE_ENV === 'production' ? '/api/graphql' : '/graphql',
+			},
 		})
 	);
-}
+};
