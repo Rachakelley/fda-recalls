@@ -1,5 +1,12 @@
 This application retrieves the published FDA recalls from the publicly available [openFDA food enforcement reports API](https://open.fda.gov/apis/food/enforcement/) and displays them on a map based on state and classification level. Recalls can be retrieved between user selected start and end dates.
 
+---
+
+![App Screenshot (Dark Mode)](./screenshots/v2_landscape_dark.png)
+![App Screenshot (Light Mode)](./screenshots/v2_landscape_light.png)
+
+---
+
 Tech stack in use:
 
 - React
